@@ -1,18 +1,17 @@
 const puppeteer = require('puppeteer');
 
 const url = 'https://tools.staysafu.org/scan?a=';
-const address = '0xb698Fb4e7052F2B6F25C22A7cAF081683CFB2e0b';
 
-async function scrape() {
-   const browser = await puppeteer.launch({ 
+async function scrapeStaySafu(tokenAddress) {
+    const browser = await puppeteer.launch({ 
       // headless: false,
       args: [
         '--no-sandbox',
-        '--disable-setuid-sandbox'
+        // '--disable-setuid-sandbox'
       ] 
     });
     const page = await browser.newPage();
-    await page.goto(url + address);
+    await page.goto(url + tokenAddress);
 
     const element = await page.waitForSelector('.app-content');
     setTimeout(async()=>{
@@ -25,9 +24,27 @@ async function scrape() {
        const buyFee = value.match(/(?<=Buy fees:)(.*?)(?=\%)/);
        const sellFee = value.match(/(?<=Sell fees:)(.*?)(?=\%)/);
        const liquidityLocked = value.match(/(?<=Liquidity:)(.*?)(?=\Holders:)/);
-       console.log(`Honepot: ${isHonepot}, Buy Fee: ${buyFee[0]}, Sell Fee: ${sellFee[0]}, Liquidity: ${liquidityLocked[0]}`);
+       const tokenomics = {
+           honepot: isHonepot,
+           buyFee: buyFee[0],
+           sellFee: sellFee[0],
+           liquidityStatus: liquidityLocked[0]
+       }
+       return tokenomics;
 
     }, 30000);
   };
 
-  scrape();
+  function ping() {
+    return new Promise((resolve) => {
+      setTimeout(()=> { resolve('pinged') }, 10000);
+    });
+  }
+
+
+module.exports = scrapeStaySafu;
+// Binance Smart Chain (BEP20)
+
+
+
+module.exports = ping;
